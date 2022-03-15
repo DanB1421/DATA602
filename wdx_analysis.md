@@ -8,11 +8,13 @@
 
 Human civilization is defined by decisions that produce beneficial and harmful outcomes. One of the most major impacts for humanity that falls into both categories is industrialization. Industrialization has made processes such as manufacturing and transportation much easier than before, but that does not come without a cost. The modified processes produced during the industrial revolution are often fueled by non-renewable resources such as coal, oil, and natural gas, also known as fossil fuels. The aftereffects have caused changes to air quality, water purity, and the ozone layer due to increases in the emission of carbon dioxide (CO<sub>2</sub>).
 
-The effect of CO<sub>2</sub> emissions also showed a direct impact on quality of life, whether this be through breathing in polluted air, prolonged exposure to carcinogens, and access to drinkable water sources. The direct results of these environmental changes can be measured in a variety of statistics, but two that have clear implications on human life are mortality rates from diseases and life expectancies. There are two major questions we can ask about these relationships:
+The effect of CO<sub>2</sub> emissions also showed a direct impact on quality of life, whether this be through breathing in polluted air, prolonged exposure to carcinogens, and access to drinkable water sources. The most direct way to combat rising CO<sub>2</sub> emissions is to introduce greater levels of renewable energy usage. Renewable energy usage produces less harmful aftereffects environmentally, as these resources produce energy without the need to emit harmful gas. Some resources that fall into this category include solar power, wind power, and hydro (water) power.
+
+ The direct results of environmental changes from energy usage can be measured in a variety of statistics, but two that have clear implications on human life are mortality rates from diseases and life expectancies. There are two major questions we can ask about these relationships:
   1. How do CO<sub>2</sub> emissions relate to both mortality rates from disease and life expectancy at birth? 
   2. How does renewable energy usage relate to both mortality rates from disease and life expectancy at birth? 
 
-These can be answered by analyzing the correlation betweren CO<sub>2</sub> emissions and renewable energy usage worldwide in the years 2000 and 2015 to disease mortalities and life expectancy at birth.
+These can be answered by analyzing the statistical signficance and correlation between CO<sub>2</sub> emissions and renewable energy usage worldwide in the years 2000 and 2015 to disease mortalities and life expectancy at birth.
 
 ## **1. Analysis Strategy and Approach**
 
