@@ -1,9 +1,10 @@
-The effect of worldwide energy consumption on disease mortality and life expectancy from 2000 to 2015
-Daniel Brilliant
+# **The effect of worldwide energy consumption on disease mortality and life expectancy from 2000 to 2015**
 
-Data Science Master's Student, UMBC
+*Daniel Brilliant*
 
-March 15, 2022
+*Data Science Master's Student, UMBC*
+
+*March 15, 2022*
 
 Human civilization is defined by decisions that produce beneficial and harmful outcomes. One of the most major impacts for humanity that falls into both categories is industrialization. Industrialization has made processes such as manufacturing and transportation much easier than before, but that does not come without a cost. The modified processes produced during the industrial revolution are often fueled by non-renewable resources such as coal, oil, and natural gas, also known as fossil fuels. The aftereffects have caused changes to air quality, water purity, and the ozone layer due to increases in the emission of carbon dioxide (CO<sub>2</sub>).
 
