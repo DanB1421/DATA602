@@ -28,24 +28,48 @@ These can be answered by analyzing the correlation betweren CO<sub>2</sub> emiss
 ## **2. How do CO<sub>2</sub> emissions relate to life expectancy and mortality rates from communicable and non-communicable disease?**
 
 ### **Worldwide CO<sub>2</sub> emission distribution in 2000 and 2015**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20CO2%20emissions%20distribution.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20CO2%20emissions%20distribution.png)
 
 ### **Non-communicable disease mortality vs CO<sub>2</sub> emissions in 2000 and 2015, with regression line**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20Noncommunicable%20disease%20vs%20CO2.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20Noncommunicable%20disease%20vs%20CO2.png)
 
 ### **Communicable disease mortality vs CO<sub>2</sub> emissions in 2000 and 2015, with regression line**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20Communicable%20disease%20vs%20CO2.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20Communicable%20disease%20vs%20CO2.png)
 
 ### **Life expectancy vs CO<sub>2</sub> emissions in 2000 and 2015, with regression line**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20Life%20expectancy%20vs%20CO2.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20Life%20expectancy%20vs%20CO2.png)
 
 **INSERT BLURB HERE**
 
 ## **3. Does an increase in renewable energy usage cause significant changes to mortality rates from disease and life expectancy?**
 
 ### **Worldwide renewable energy usage distribution in 2000 and 2015**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20Renewable%20energy%20usage%20distribution.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20Renewable%20energy%20usage%20distribution.png)
 
 ### **Non-communicable disease mortality vs Renewable energy usage in 2000 and 2015, with regression line**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20Noncommunicable%20disease%20vs%20renewable%20energy.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20Noncommunicable%20disease%20vs%20renewable%20energy.png)
 
 ### **Communicable disease mortality vs Renewable energy usage in 2000 and 2015, with regression line**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20Communicable%20disease%20vs%20renewable%20energy.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20Communicable%20disease%20vs%20renewable%20energy.png)
 
 ### **Life expectancy vs Renewable energy usage in 2000 and 2015, with regression line**
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2000%20Life%20expectancy%20vs%20renewable%20energy.png)
+
+![](https://github.com/DanB1421/world_development_explorer_final/blob/1797ebd62c0b6dddd7b7e7ac6eb9f67478053f95/charts/2015%20Life%20expectancy%20vs%20renewable%20energy.png)
 
 **INSERT BLURB HERE**
 
