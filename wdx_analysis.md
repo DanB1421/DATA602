@@ -19,7 +19,7 @@ These can be answered by analyzing the statistical signficance and correlation b
 ## **1. Analysis Strategy and Approach**
 
 - **Data Source:** World Development Explorer ([worlddev.xyz](https://))
-- **Countries Analyzed:** Comoros, Denmark, Finland, Hungary, Iceland, Moldova, North Korea (referred to here as Democratic People's Republic of Korea), Sweden, Uruguay, and Zimbabwe
+- **Countries Analyzed:** All eligible countries during the timespan studied
 - **Timespan of Data:** 2000-2015
 - **Topics & Indicators:**
   - **Environment- Renewable energy consumption (% of total final energy consumption):** the share of renewable energy in the total final energy consumption.
