@@ -1,0 +1,959 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "gpuClass": "standard"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/DanB1421/DATA602/blob/main/Brilliant_Problem_Set_7.%20%20%20%20%20%20%20%20%20ipynb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Preamble\n",
+        "This problem set is an extension of Problem Set 6.  You will need the following artifacts from last week:\n",
+        "\n",
+        "* The MNIST 784 dataset from OpenML, with dimensionality reduced to about 75\\%.\n",
+        "* The Support Vector Machine classifier.\n",
+        "* Recoded target variables, such that the target variable is 1 if the digit is less than 5, and 0 otherwise.\n",
+        "\n",
+        "(You may copy these artifacts from the posted solutions if needed.)  As with last week, please use the first 60,000 observations as training data, and the remaining 10,000 images as test data."
+      ],
+      "metadata": {
+        "id": "Dd-BTPFD4MBH"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.datasets import fetch_openml\n",
+        "from sklearn.preprocessing import MinMaxScaler\n",
+        "import numpy as np\n",
+        "from joblib import dump, load\n",
+        "from sklearn.model_selection import cross_val_predict\n",
+        "from sklearn.metrics import classification_report\n",
+        "#fetch OpenML data\n",
+        "X, y = fetch_openml('mnist_784', version=1, return_X_y=True, as_frame=False)\n",
+        "\n",
+        "#split into test/training sets\n",
+        "N=60000\n",
+        "X_train, y_train = X[:N, :], y[:N]\n",
+        "X_test, y_test = X[N:, :], y[N:]\n",
+        "\n",
+        "#scale data\n",
+        "scaler = MinMaxScaler()\n",
+        "X_train_sc = scaler.fit_transform(X_train)\n",
+        "X_test_sc = scaler.transform(X_test)"
+      ],
+      "metadata": {
+        "id": "IJwiByZP_8aN",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "fadca16f-95c5-490b-da29-7384425c6960"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.9/dist-packages/sklearn/datasets/_openml.py:968: FutureWarning: The default value of `parser` will change from `'liac-arff'` to `'auto'` in 1.4. You can set `parser='auto'` to silence this warning. Therefore, an `ImportError` will be raised from 1.4 if the dataset is dense and pandas is not installed. Note that the pandas parser may return different data types. See the Notes Section in fetch_openml's API doc for details.\n",
+            "  warn(\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.decomposition import PCA # imports PCA module from sklearn\n",
+        "pca = PCA(n_components=0.75) # generates a PCA that includes 75% of the original variance\n",
+        "X_train_sc = pca.fit_transform(X_train_sc) # fits and transforms X_train_sc using PCA\n",
+        "X_test_sc = pca.transform(X_test_sc) # transforms X_test_sc using PCA\n",
+        "print(X_train_sc.shape) # prints the shape of X_train_sc"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "LssHFEGZ_vbp",
+        "outputId": "41ef400f-7dba-46dd-8e38-921db49b2b27"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(60000, 34)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "X_train = pca.fit_transform(X_train) # fits and transforms X_train using PCA\n",
+        "X_test = pca.transform(X_test) # transforms X_test using PCA\n",
+        "print(X_train.shape) # prints the shape of X_train_sc"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "U040y8UuCxO1",
+        "outputId": "68b541ba-d976-4f84-847c-0bb33aad7ab1"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(60000, 34)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_train_mod = y_train.astype(int) # converts y_train to integers\n",
+        "y_test_mod = y_test.astype(int) # converts y_test to integers\n",
+        "y_train_recode = np.where(y_train_mod < 5, 1, 0) # recodes y_train to binary where 1 replaces values less than 5 and 0 replaces all other values\n",
+        "y_test_recode = np.where(y_test_mod < 5, 1, 0) # recodes y_test to binary where 1 replaces values less than 5 and 0 replaces all other values"
+      ],
+      "metadata": {
+        "id": "GOpq47bAAEnx"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.svm import SVC # imports SVC module\n",
+        "clf_svc = SVC(C=464.15888336127773,\n",
+        "          break_ties=False,\n",
+        "          cache_size=200,\n",
+        "          class_weight=None,\n",
+        "          coef0=0.0,\n",
+        "          decision_function_shape='ovr',\n",
+        "          degree=3,\n",
+        "          gamma=0.4444444444444444,\n",
+        "          kernel='rbf',\n",
+        "          max_iter=-1,\n",
+        "          probability=False,\n",
+        "          random_state=None,\n",
+        "          shrinking=True,\n",
+        "          tol=0.001,\n",
+        "          verbose=False) # creates SVC using parameters obtained from the search in Problem Set 6 and stores as a classifier\n",
+        "\n",
+        "dump(clf_svc, 'clf_svc.pkl', compress=1) # saves the model in a file called clf_svc.pkl"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "STiu0InKAHQY",
+        "outputId": "c40a0596-f644-44e5-b4ce-ea9d5a2ba552"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['clf_svc.pkl']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 4
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "clf_svc = load('clf_svc.pkl') # loads saved clf_svc model from file\n",
+        "y_train_pred = cross_val_predict(clf_svc, X_train_sc, y_train_recode) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "id": "eocA14ZggB9R",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "2c365fa9-2cbf-495d-f72a-666b76b5c39c"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.98      0.96      0.97     29404\n",
+            "           1       0.96      0.98      0.97     30596\n",
+            "\n",
+            "    accuracy                           0.97     60000\n",
+            "   macro avg       0.97      0.97      0.97     60000\n",
+            "weighted avg       0.97      0.97      0.97     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Problem 1 -- Classifiers\n",
+        "\n",
+        "Construct 3 classifiers using different algorithms, not including the SVM model built last week, that classify the MNIST dataset with an $F_1$ score of at least 0.9.  At least one classifier must use gradient boosting (AdaBoost, Gradient Boost, or xgboost).  Show the $F_1$ score and classification report for each model."
+      ],
+      "metadata": {
+        "id": "5tPtoB1Y3v77"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.ensemble import AdaBoostClassifier # imports AdaBoost module from sklearn\n",
+        "clf_ada = AdaBoostClassifier(n_estimators=2000,\n",
+        "                             random_state=0,\n",
+        "                             learning_rate=0.1) # creates AdaBoost classifier"
+      ],
+      "metadata": {
+        "id": "rNIj3Wld4HCG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_train_pred = cross_val_predict(clf_ada, X_train, y_train_recode) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "-dHJZXS26VqA",
+        "outputId": "1024219f-3bf6-4317-dec3-434dd6d1ac5f"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.84      0.87      0.86     29404\n",
+            "           1       0.87      0.84      0.86     30596\n",
+            "\n",
+            "    accuracy                           0.86     60000\n",
+            "   macro avg       0.86      0.86      0.86     60000\n",
+            "weighted avg       0.86      0.86      0.86     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.ensemble import GradientBoostingClassifier # imports GradientBoostingClassifier module from sklearn\n",
+        "clf_grd = GradientBoostingClassifier(n_estimators=1000, random_state=0,\n",
+        "                                     max_depth=8,\n",
+        "                                     max_features='sqrt') # creates GradientBoostingClassifier"
+      ],
+      "metadata": {
+        "id": "CStSyN0g4Ed4"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_train_pred = cross_val_predict(clf_grd, X_train, y_train_recode) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "G8uhLm5c6nOM",
+        "outputId": "e0828ebe-8a63-4b35-b099-bcd20804347f"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.97      0.98      0.98     29404\n",
+            "           1       0.98      0.97      0.98     30596\n",
+            "\n",
+            "    accuracy                           0.98     60000\n",
+            "   macro avg       0.98      0.98      0.98     60000\n",
+            "weighted avg       0.98      0.98      0.98     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import xgboost as xgb # imports xgb module from xgboost\n",
+        "clf_xgb = xgb.XGBClassifier(n_estimators=1000,\n",
+        "                            max_depth=8,\n",
+        "                            colsample_bylevel=0.5) # creates xgboost classifier"
+      ],
+      "metadata": {
+        "id": "5RNy3Jns4Qsw"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_train_pred = cross_val_predict(clf_xgb, X_train, y_train_recode) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5ddsneav60ci",
+        "outputId": "4eb7e333-caf0-42d6-d443-a1668fdc0108"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.97      0.98      0.98     29404\n",
+            "           1       0.98      0.98      0.98     30596\n",
+            "\n",
+            "    accuracy                           0.98     60000\n",
+            "   macro avg       0.98      0.98      0.98     60000\n",
+            "weighted avg       0.98      0.98      0.98     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.linear_model import LogisticRegression # imports LogisticRegression module from sklearn\n",
+        "clf_log = LogisticRegression(C=.1, max_iter=100) # creates LogisticRegression classifier"
+      ],
+      "metadata": {
+        "id": "tODPaOi24U8a"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_train_pred = cross_val_predict(clf_log, X_train_sc, y_train_recode) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "zyxMWe3164sB",
+        "outputId": "b78d0d39-018b-49d9-d70b-45434d22d3c3"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.80      0.82      0.81     29404\n",
+            "           1       0.82      0.81      0.81     30596\n",
+            "\n",
+            "    accuracy                           0.81     60000\n",
+            "   macro avg       0.81      0.81      0.81     60000\n",
+            "weighted avg       0.81      0.81      0.81     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.tree import DecisionTreeClassifier # imports DecisionTreeClassifier module from sklearn\n",
+        "clf_decision_tree = DecisionTreeClassifier(ccp_alpha=.01) # creates DecisionTreeClassifier"
+      ],
+      "metadata": {
+        "id": "cQht11HF4Wx7"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_train_pred = cross_val_predict(clf_decision_tree, X_train, y_train_recode) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "FYiKqzPE7cGK",
+        "outputId": "622f00a3-be9b-468b-f6cd-8b22e991d996"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.73      0.76      0.74     29404\n",
+            "           1       0.76      0.73      0.74     30596\n",
+            "\n",
+            "    accuracy                           0.74     60000\n",
+            "   macro avg       0.74      0.74      0.74     60000\n",
+            "weighted avg       0.74      0.74      0.74     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.ensemble import RandomForestClassifier # imports RandomForestClassifier module from sklearn\n",
+        "clf_random_forest = RandomForestClassifier(n_estimators=1000,\n",
+        "                             oob_score=True,\n",
+        "                             min_samples_split=10,\n",
+        "                             min_samples_leaf=5) # creates RandomForestClassifier"
+      ],
+      "metadata": {
+        "id": "TWyyQvrx4Yy8"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_train_pred = cross_val_predict(clf_random_forest, X_train, y_train_recode) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "IOBnOWSf78Z2",
+        "outputId": "22c5737b-1f46-477d-d3fa-6b521ec7a24f"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.95      0.97      0.96     29404\n",
+            "           1       0.97      0.95      0.96     30596\n",
+            "\n",
+            "    accuracy                           0.96     60000\n",
+            "   macro avg       0.96      0.96      0.96     60000\n",
+            "weighted avg       0.96      0.96      0.96     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "dump(clf_grd, 'clf_grd.pkl', compress=1) # saves the model in a file called clf_grd.pkl\n",
+        "dump(clf_xgb, 'clf_xgb.pkl', compress=1) # saves the model in a file called clf_xgb.pkl\n",
+        "dump(clf_random_forest, 'clf_random_forest.pkl', compress=1) # saves the model in a file called clf_random_forest.pkl"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "WLw5U86Pmu-Q",
+        "outputId": "552f0931-eaf5-4299-8b9c-96e6278d1287"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['clf_random_forest.pkl']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 15
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Problem 2 -- Voting ensemble model\n",
+        "\n",
+        "Build a voting ensemble model that combines the three classifiers from the previous problem, in addition to the SVM model developed last week.  What is the $F_1$ score of the ensemble model?"
+      ],
+      "metadata": {
+        "id": "LG5qDkzu4uRS"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "clf_svc = load('clf_svc.pkl') # loads clf_svc from file\n",
+        "from sklearn.pipeline import make_pipeline # imports make_pipeline module from sklearn\n",
+        "\n",
+        "clf_svc_pipeline = make_pipeline(scaler, clf_svc) # makes a pipeline that runs a scaler and the clf_svc model\n",
+        "dump(clf_svc_pipeline, 'clf_svc_pipeline.pkl', compress=1) # saves the model in a file called clf_svc_pipeline.pkl"
+      ],
+      "metadata": {
+        "id": "QIReirN0418z",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "fb63aafe-4097-4846-d8c2-916abf8d7c97"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['clf_svc_pipeline.pkl']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 4
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "clf_grd = load('clf_grd.pkl') # loads clf_grd from file\n",
+        "clf_xgb = load('clf_xgb.pkl') # loads clf_xgb from file\n",
+        "clf_random_forest = load('clf_random_forest.pkl') # loads clf_random_forest from file\n",
+        "clf_svc_pipeline = load('clf_svc_pipeline.pkl') # loads clf_svc_pipeline from file"
+      ],
+      "metadata": {
+        "id": "X_28OI_AXpeY"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.ensemble import VotingClassifier # imports VotingClassifier module from sklearn\n",
+        "clfs = [('gbm', clf_grd),\n",
+        "        ('xgbm', clf_xgb),\n",
+        "        ('random forest', clf_random_forest),\n",
+        "        ('svm', clf_svc_pipeline)] # creates list of tuples containing classifiers to pass through VotingClassifier\n",
+        "\n",
+        "clf_vot = VotingClassifier(clfs) # creates VotingClassifier from list of tuples containing classifiers\n",
+        "dump(clf_vot, 'clf_vot.pkl', compress=1) # saves the model in a file called clf_svc_pipeline.pkl"
+      ],
+      "metadata": {
+        "id": "hFqL_elq9Kcu",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "7437413e-17a8-4eb6-83c3-dbacaf281dcf"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['clf_vot.pkl']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 5
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "clf_vot = load('clf_vot.pkl') # loads clf_vot from file\n",
+        "y_train_pred = cross_val_predict(clf_vot, X_train, y_train_recode, cv=2) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "iX5Dqqcc5AeF",
+        "outputId": "0049617c-b4e6-46fd-9aa3-5d391ec330c9"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.99      0.96      0.98     29404\n",
+            "           1       0.96      0.99      0.98     30596\n",
+            "\n",
+            "    accuracy                           0.98     60000\n",
+            "   macro avg       0.98      0.98      0.98     60000\n",
+            "weighted avg       0.98      0.98      0.98     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "The F1 score is about 0.98"
+      ],
+      "metadata": {
+        "id": "DREEJidGBlMr"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Problem 3 -- Stacking ensemble model\n",
+        "Stacking uses a final classifier (often a logistic regression) that outputs an aggregate of the predictors. Repeat the previous problem using a `StackingClassifier` rather than voting to compute the final prediction.  What is the $F_1$ score of the stacking classifier?\n"
+      ],
+      "metadata": {
+        "id": "B2Pnq0i042SD"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from sklearn.ensemble import StackingClassifier # imports StackingClassifier from sklearn\n",
+        "clf_stack = StackingClassifier(clfs) # creates StackingClassifier from list of tuples containing classifiers\n",
+        "dump(clf_stack, 'clf_stack.pkl', compress=1) # saves the model in a file called clf_stack.pkl"
+      ],
+      "metadata": {
+        "id": "FjSzABoMrmZr",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "60e41b58-a8c8-48d7-e600-e2ff2a036b49"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['clf_stack.pkl']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 11
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "clf_stack = load('clf_stack.pkl') # loads clf_stack from file\n",
+        "y_train_pred = cross_val_predict(clf_stack, X_train, y_train_recode, cv=2) # generates cross-validated estimates for each data point using the developed model on the training data\n",
+        "print(classification_report(y_train_recode, y_train_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "so_Sku0bgpig",
+        "outputId": "7250e9e0-f35f-4273-f55c-bbca88bf9036"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.98      0.98      0.98     29404\n",
+            "           1       0.98      0.98      0.98     30596\n",
+            "\n",
+            "    accuracy                           0.98     60000\n",
+            "   macro avg       0.98      0.98      0.98     60000\n",
+            "weighted avg       0.98      0.98      0.98     60000\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "The F1 score is about 0.98."
+      ],
+      "metadata": {
+        "id": "D0028pGWDpzc"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Problem 4 -- Evaluation\n",
+        "\n",
+        "At this point in the assignment, you have six classifiers:\n",
+        "\n",
+        "* the support vector classifier from last week,\n",
+        "* the three classifiers from problem 1,\n",
+        "* the voting classifier from problem 2, and\n",
+        "* the stacking classifier from problem 3\n",
+        "\n",
+        "Identify the model with the highest $F_1$ score, and train this model with the full training dataset.  Finally, score the test data against this model.  Does the model demonstrate predictive validity (i.e., are the $F_1$ scores for the test data comparable to the training data)?"
+      ],
+      "metadata": {
+        "id": "GRQ5OOdw5ABg"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "f1_grd = (2 * (0.97 * 0.98) / (0.97 + 0.98)) # uses precision and recall values from classification report to calculate approximate f1 score of clf_grd\n",
+        "print(f1_grd) # prints f1_grd score"
+      ],
+      "metadata": {
+        "id": "q4mAMvwN5KkM",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "1a1b586b-3d63-4102-bd7f-4edaa3c8eb84"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.974974358974359\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "f1_xgb = (2 * (0.98 * 0.98) / (0.98 + 0.98)) # uses precision and recall values from classification report to calculate approximate f1 score of clf_xgb\n",
+        "print(f1_xgb) # prints f1_xgb score"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "JGWkdcEkJXra",
+        "outputId": "00cd296e-8929-4bd4-e347-2e84dc2af57b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.98\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "f1_vot = (2 * (0.99 * 0.96) / (0.99 + 0.96)) # uses precision and recall values from classification report to calculate approximate f1 score of clf_vot\n",
+        "print(f1_vot) # prints f1_vot score"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "XU4Z_gsxJj8W",
+        "outputId": "23226e23-28e3-4ace-e6fe-be3ce5312c6c"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.9747692307692307\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "f1_stack = (2 * (0.98 * 0.98) / (0.98 + 0.98)) # uses precision and recall values from classification report to calculate approximate f1 score of clf_stack\n",
+        "print(f1_stack) # prints f1_stack score"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "v1ljggxTJyoy",
+        "outputId": "c7b46161-2e5d-4309-96c6-86a161e3328f"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.98\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "clf_xgb = load('clf_xgb.pkl') # loads clf_xgb from file"
+      ],
+      "metadata": {
+        "id": "8d5E1hy_NRQo"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "clf_xgb.fit(X_train, y_train_recode) # fits clf_xgb to the training dataset"
+      ],
+      "metadata": {
+        "id": "UAQeo7KfOWsA",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 74
+        },
+        "outputId": "2fda4d40-0d76-4481-fa52-8b00fd38cd5a"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "SVC(C=464.15888336127773, gamma=0.4444444444444444)"
+            ],
+            "text/html": [
+              "<style>#sk-container-id-1 {color: black;background-color: white;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: \"▸\";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: \"▾\";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: \"\";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: \"\";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div id=\"sk-container-id-1\" class=\"sk-top-container\"><div class=\"sk-text-repr-fallback\"><pre>SVC(C=464.15888336127773, gamma=0.4444444444444444)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class=\"sk-container\" hidden><div class=\"sk-item\"><div class=\"sk-estimator sk-toggleable\"><input class=\"sk-toggleable__control sk-hidden--visually\" id=\"sk-estimator-id-1\" type=\"checkbox\" checked><label for=\"sk-estimator-id-1\" class=\"sk-toggleable__label sk-toggleable__label-arrow\">SVC</label><div class=\"sk-toggleable__content\"><pre>SVC(C=464.15888336127773, gamma=0.4444444444444444)</pre></div></div></div></div></div>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 8
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "y_test_pred = cross_val_predict(clf_xgb, X_test, y_test_recode) # generates cross-validated estimates for each data point using the developed model on the test data\n",
+        "print(classification_report(y_test_recode, y_test_pred)) # prints classification report"
+      ],
+      "metadata": {
+        "id": "OKIyZfAWLOAH",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "9c5ac8e0-2f59-4cc5-dc44-dcb7ad0ff8c3"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "              precision    recall  f1-score   support\n",
+            "\n",
+            "           0       0.00      0.00      0.00      4861\n",
+            "           1       0.51      1.00      0.68      5139\n",
+            "\n",
+            "    accuracy                           0.51     10000\n",
+            "   macro avg       0.26      0.50      0.34     10000\n",
+            "weighted avg       0.26      0.51      0.35     10000\n",
+            "\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.9/dist-packages/sklearn/metrics/_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.\n",
+            "  _warn_prf(average, modifier, msg_start, len(result))\n",
+            "/usr/local/lib/python3.9/dist-packages/sklearn/metrics/_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.\n",
+            "  _warn_prf(average, modifier, msg_start, len(result))\n",
+            "/usr/local/lib/python3.9/dist-packages/sklearn/metrics/_classification.py:1344: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.\n",
+            "  _warn_prf(average, modifier, msg_start, len(result))\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "According to the above evaluation, the xgboost model does not have predictive validity."
+      ],
+      "metadata": {
+        "id": "ft_hEwKjdfNN"
+      }
+    }
+  ]
+}
